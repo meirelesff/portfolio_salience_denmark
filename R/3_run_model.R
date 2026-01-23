@@ -5,6 +5,7 @@
 
 # Packages
 library(tidyverse)
+library(posterior)
 library(cmdstanr)
 library(here)
 
@@ -33,11 +34,15 @@ list_data <- list(
     occ = denmark_panel$occupied
 )
 
+
 # Compile the model
 options(mc.cores = 4)
 model <- cmdstan_model(here("stan", "party_effects_occupation_model.stan"))
 
+
 # Run the model (~4h, depending on resources)
+# (First few iterations may return warnings about divergent transitions;
+# this is normal and should be over by the end of the warmup)
 inicio <- Sys.time()
 fit <- model$sample(
   data = list_data,
@@ -51,7 +56,7 @@ fit <- model$sample(
 fim <- Sys.time()
 fim - inicio
 
-fit$save_object(file = here("models", "model_full.Rds"))
+fit$save_object(file = here("results", "full_model.Rds"))
 #fit <- readRDS(here("models", "model_full.Rds"))
 
 
@@ -64,9 +69,10 @@ est_param <- fit %>%
   na.omit() %>%
   sample_n(1000)
 
-saveRDS(est_param, file = here("models", "est_param_fullmodel.Rds"))
+saveRDS(est_param, file = here("results", "denmark_params.Rds"))
 rm(est_param)
 gc()
+
 
 # Save estimates
 estimates <- fit$summary(variables = c("alpha", "beta", "theta", "lambda", "gamma", "est"), 
@@ -74,21 +80,15 @@ estimates <- fit$summary(variables = c("alpha", "beta", "theta", "lambda", "gamm
   as_tibble() %>%
   set_names("parameter", "estimate", "lo95", "up80", "lo80", "up95")
 
-saveRDS(estimates, file = here("models", "model_summary_fullmodel.Rds"))
+saveRDS(estimates, file = here("results", "denmark_model_summary.Rds"))
 
 
-# Save model predictions
-y_pred <- fit %>%
-  spread_draws(y_pred[n], ndraws = 1000, seed = 44)
-
-saveRDS(y_pred, file = here("models", "model_predictions_fullmodel.Rds"))
-
-
-# Check model with shinystan
+# Check model
 fit$diagnostic_summary()
 
 draws <- fit$draws()
-mcmc_trace(draws)
+plot(draws)
 
 
+# Further model checks with shinystan
 shinystan::launch_shinystan(shinystan::as.shinystan(fit))

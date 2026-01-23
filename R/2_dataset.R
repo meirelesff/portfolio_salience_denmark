@@ -49,6 +49,11 @@ denmark_panel <- denmark_panel %>%
     select(year, ministry, party, contains("pct_"), occupied)
 
 
+# Remove a few cases of NA in ministry
+denmark_panel <- denmark_panel %>%
+    filter(!is.na(ministry))
+
+
 # Create integer IDs and cut intervals
 denmark_panel <- denmark_panel %>%
     pivot_longer(-c(year, ministry, party, occupied), names_to = "indicator") %>%
@@ -64,6 +69,7 @@ denmark_panel <- denmark_panel %>%
     ungroup() %>%
     # Relocate IDs
     select(year, year_id, ministry, ministry_id, party, party_id, indicator, indicator_id, value, y, occupied)
+
 
 
 # Save dataset
