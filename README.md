@@ -19,3 +19,13 @@ The repository is structured as follows:
 ├── results        # Output results (figures, tables, model outputs)
 └── stan           # Stan model files
 ```
+
+## Replicating the analysis
+
+To run the full data cleaning and modeling pipeline, run scripts in r `/R` folder sequentially or use the Makefile. In the latter case, execute from root folder:
+
+```
+make
+```
+
+This will automatically run all R scripts in the correct order and generate the final outputs in the `/results` folder. 
