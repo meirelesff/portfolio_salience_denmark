@@ -23,22 +23,25 @@ denmark_panel <- denmark_panel %>%
 # Calculate parties' total activities in each input
 parties_to_exclude <- denmark_panel %>%
     group_by(party) %>%
-    summarise(across(c(scope_interpellations, n_questions, n_motions, n_bills), \(x) sum(x), .names = "total_{col}")) %>%
+    summarise(across(c(scope_interpellations, n_interpellations, n_questions, n_motions, n_bills), \(x) sum(x), .names = "total_{col}")) %>%
     mutate(across(contains("total_"), \(x) x / sum(x), .names = "pct_{col}")) %>%
+    group_by(party) %>%
+    summarise(across(contains("pct_"), \(x) mean(x, na.rm = T))) %>%
     arrange(desc(pct_total_scope_interpellations)) %>%
-    # Select the last 4 parties to exclude
-    slice_tail(n = 4) %>%
+    # Select the 8 most active parties
+    slice(1:8) %>%
     pull(party)
 
 
-# Calculate percentages of activities per year-party
+# Calculate percentages of activities per session-party
 denmark_panel <- denmark_panel %>%
     filter(!party %in% parties_to_exclude) %>%
     group_by(year, party) %>%
-    mutate(across(c(scope_interpellations, n_questions, n_motions, n_bills), \(x) sum(x), .names = "total_{col}")) %>%
+    mutate(across(c(scope_interpellations, n_interpellations, n_questions, n_motions, n_bills), \(x) sum(x), .names = "total_{col}")) %>%
     group_by(year, party, ministry, occupied) %>%
     mutate(
         pct_interpellations = scope_interpellations / first(total_scope_interpellations),
+        pct_n_interpellations = n_interpellations / first(total_n_interpellations),
         pct_questions = n_questions / first(total_n_questions),
         pct_motions = n_motions / first(total_n_motions),
         pct_bills = n_bills / first(total_n_bills)

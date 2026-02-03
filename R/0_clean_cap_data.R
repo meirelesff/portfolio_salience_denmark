@@ -42,7 +42,11 @@ cap_interpellations <- cap_interpellations %>%
     # Summarise
     filter(sponsored == 1 & targeted == 1) %>%
     group_by(year, party, ministry) %>%
-    summarise(scope_interpellations = sum(scope_debate, na.rm = TRUE), .groups = "drop") 
+    summarise(
+        scope_interpellations = sum(scope_debate, na.rm = TRUE),
+        n_interpellations = n(),
+        .groups = "drop"
+    )
 
 
 # Clean questions
@@ -136,6 +140,7 @@ denmark_panel <- 2007:2016 %>%
     # Join interpellations
     left_join(cap_interpellations, by = c("year", "party", "ministry")) %>%
     mutate(scope_interpellations = replace_na(scope_interpellations, 0)) %>%
+    mutate(n_interpellations = replace_na(n_interpellations, 0)) %>%
     # Join questions
     left_join(cap_questions, by = c("year", "party", "ministry")) %>%
     mutate(n_questions = replace_na(n_questions, 0)) %>%
