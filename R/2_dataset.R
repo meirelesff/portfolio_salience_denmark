@@ -21,7 +21,7 @@ denmark_panel <- denmark_panel %>%
 
 
 # Calculate parties' total activities in each input
-parties_to_exclude <- denmark_panel %>%
+parties_to_include <- denmark_panel %>%
     group_by(party) %>%
     summarise(across(c(scope_interpellations, n_interpellations, n_questions, n_motions, n_bills), \(x) sum(x), .names = "total_{col}")) %>%
     mutate(across(contains("total_"), \(x) x / sum(x), .names = "pct_{col}")) %>%
@@ -35,7 +35,7 @@ parties_to_exclude <- denmark_panel %>%
 
 # Calculate percentages of activities per session-party
 denmark_panel <- denmark_panel %>%
-    filter(!party %in% parties_to_exclude) %>%
+    filter(party %in% parties_to_include) %>%
     group_by(year, party) %>%
     mutate(across(c(scope_interpellations, n_interpellations, n_questions, n_motions, n_bills), \(x) sum(x), .names = "total_{col}")) %>%
     group_by(year, party, ministry, occupied) %>%
@@ -73,6 +73,7 @@ denmark_panel <- denmark_panel %>%
     # Relocate IDs
     select(year, year_id, ministry, ministry_id, party, party_id, indicator, indicator_id, value, y, occupied)
 
+apply(denmark_panel, 2, function(x) sum(is.na(x)))
 
 
 # Save dataset

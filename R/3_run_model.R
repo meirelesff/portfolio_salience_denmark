@@ -5,6 +5,7 @@
 
 # Packages
 library(tidyverse)
+library(patchwork)
 library(posterior)
 library(cmdstanr)
 library(here)
@@ -15,13 +16,14 @@ if (!dir.exists(here("results"))) dir.create(here("results"))
 
 
 # Load data
+dw_scores <- read_csv(here("raw-data", "csv", "druckman_warwick.csv"))
 load(here("data", "input_dataset.Rda"))
 
 
 # Create input list
 list_data <- list(
     J = denmark_panel$ministry_id %>% unique() %>% length(),
-    K = 4,
+    K = 5,
     P = denmark_panel$party_id %>% unique() %>% length(),
     N = nrow(denmark_panel),
     T = denmark_panel$year_id %>% unique() %>% length(),
