@@ -20,6 +20,10 @@ data/input_dataset.Rda: R/2_dataset.R data/denmark_panel.Rda data/denmark_cabine
 results/denmark_model_summary.Rds: R/3_run_model.R data/input_dataset.Rda
 	$(RSCRIPT) $(ROOT)/R/3_run_model.R
 
+# Step 5: Validation
+results/denmark_salience.pdf results/denmark_gov_effects.pdf results/denmark_validation.pdf: R/4_analysis.R results/denmark_model_summary.Rds
+	$(RSCRIPT) $(ROOT)/R/4_analysis.R
+
 .PHONY: all clean
 
 clean:
